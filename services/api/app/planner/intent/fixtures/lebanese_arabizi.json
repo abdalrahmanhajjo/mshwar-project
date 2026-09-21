@@ -1,0 +1,150 @@
+{
+  "threshold": 0.85,
+  "notes": "Lebanese dialect + Latin-script Arabizi. Lexicon extract_intent() for the 85% eval; Epic 8 LLM path is extract_constraints().",
+  "cases": [
+    {
+      "id": "lb-byblos-day",
+      "prompt": "بدي يوم بجبيل",
+      "script": "ar-LB",
+      "expected": { "destination": "byblos", "needs_clarification": false }
+    },
+    {
+      "id": "lb-batroun-weekend",
+      "prompt": "خلينا نروح عالبترون هالويكند",
+      "script": "ar-LB",
+      "expected": { "destination": "batroun", "date_hint": "weekend", "needs_clarification": false }
+    },
+    {
+      "id": "lb-cedars",
+      "prompt": "بدنا نشوف الأرز ببشري",
+      "script": "ar-LB",
+      "expected": { "destination": "bsharri", "category": "nature", "needs_clarification": false }
+    },
+    {
+      "id": "lb-cheap-beirut",
+      "prompt": "في شي رخيص قرب بيروت؟",
+      "script": "ar-LB",
+      "expected": { "destination": "beirut", "budget": "low", "needs_clarification": false }
+    },
+    {
+      "id": "arabizi-jbeil-tomorrow",
+      "prompt": "bade nrouh 3a jbeil bokra",
+      "script": "arabizi",
+      "expected": { "destination": "byblos", "date_hint": "tomorrow", "needs_clarification": false }
+    },
+    {
+      "id": "arabizi-batroun-weekend",
+      "prompt": "shu fi 3moul el weekend b batroun",
+      "script": "arabizi",
+      "expected": { "destination": "batroun", "date_hint": "weekend", "needs_clarification": false }
+    },
+    {
+      "id": "arabizi-cedars",
+      "prompt": "nshouf el arz b bcharre",
+      "script": "arabizi",
+      "expected": { "destination": "bsharri", "category": "nature", "needs_clarification": false }
+    },
+    {
+      "id": "arabizi-coast",
+      "prompt": "fiyye mshwar 3al baher",
+      "script": "arabizi",
+      "expected": { "category": "coast", "needs_clarification": false }
+    },
+    {
+      "id": "lb-lunch-sea",
+      "prompt": "بدنا غدا عالبحر",
+      "script": "ar-LB",
+      "expected": { "kind": "restaurant", "category": "coast", "needs_clarification": false }
+    },
+    {
+      "id": "arabizi-baalbek-two",
+      "prompt": "kelna tnen bade nrouh 3a baalbek",
+      "script": "arabizi",
+      "expected": { "destination": "baalbek", "party_size": 2, "needs_clarification": false }
+    },
+    {
+      "id": "lb-qadisha",
+      "prompt": "يلا نروح عالقاديشا",
+      "script": "ar-LB",
+      "expected": { "destination": "qadisha-valley", "needs_clarification": false }
+    },
+    {
+      "id": "arabizi-family-byblos",
+      "prompt": "ma3 el 3ayle 3a byblos",
+      "script": "arabizi",
+      "expected": { "destination": "byblos", "party_size": 4, "needs_clarification": false }
+    },
+    {
+      "id": "lb-adventure-nature",
+      "prompt": "بدي مغامرة بالطبيعة",
+      "script": "ar-LB",
+      "expected": { "category": "nature", "needs_clarification": false }
+    },
+    {
+      "id": "mixed-cheap-lunch-sea",
+      "prompt": "cheap lunch near the sea",
+      "script": "en",
+      "expected": { "kind": "restaurant", "category": "coast", "budget": "low", "needs_clarification": false }
+    },
+    {
+      "id": "fr-beirut",
+      "prompt": "on veut aller à beyrouth",
+      "script": "fr",
+      "expected": { "destination": "beirut", "needs_clarification": false }
+    },
+    {
+      "id": "arabizi-habibti-jbeil",
+      "prompt": "7abibti bade nrouh 3a jbeil",
+      "script": "arabizi",
+      "expected": { "destination": "byblos", "needs_clarification": false }
+    },
+    {
+      "id": "lb-today-beirut",
+      "prompt": "اليوم عبيروت",
+      "script": "ar-LB",
+      "expected": { "destination": "beirut", "date_hint": "today", "needs_clarification": false }
+    },
+    {
+      "id": "en-tour-baalbek",
+      "prompt": "tour in baalbek",
+      "script": "en",
+      "expected": { "destination": "baalbek", "kind": "experience", "needs_clarification": false }
+    },
+    {
+      "id": "lb-restaurant-jbeil",
+      "prompt": "مطعم بجبيل",
+      "script": "ar-LB",
+      "expected": { "destination": "byblos", "kind": "restaurant", "needs_clarification": false }
+    },
+    {
+      "id": "arabizi-mountain-cedar",
+      "prompt": "nro7 3a jabal w nshouf el arz",
+      "script": "arabizi",
+      "expected": { "category": "nature", "needs_clarification": false }
+    },
+    {
+      "id": "clarify-gibberish",
+      "prompt": "asdf qwer zxcv",
+      "script": "en",
+      "expected": { "needs_clarification": true, "destination": null }
+    },
+    {
+      "id": "clarify-ma-fhemet",
+      "prompt": "ما فهمت",
+      "script": "ar-LB",
+      "expected": { "needs_clarification": true, "destination": null }
+    },
+    {
+      "id": "clarify-hello",
+      "prompt": "hello",
+      "script": "en",
+      "expected": { "needs_clarification": true, "destination": null }
+    },
+    {
+      "id": "clarify-vague-want",
+      "prompt": "بدي شي",
+      "script": "ar-LB",
+      "expected": { "needs_clarification": true, "destination": null }
+    }
+  ]
+}
