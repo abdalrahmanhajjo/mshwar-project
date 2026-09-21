@@ -47,7 +47,10 @@ PUBLIC_ROUTES = {
     "GET /api/v1/profile/vocabularies",
     "GET /api/v1/privacy/policies",
 }
-TOKEN_ROUTES: set[str] = set()
+TOKEN_ROUTES = {
+    "GET /api/v1/groups/join/{token}",
+    "POST /api/v1/groups/join/{token}",
+}
 SIGNATURE_ROUTES: set[str] = set()
 # 42501 messages that are business rules the caller should read, not authorisation decisions.
 BUSINESS_RULE_DENIALS = {
