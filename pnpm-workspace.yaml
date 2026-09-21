@@ -1,0 +1,11 @@
+packages:
+  - "apps/web"
+  - "services/api"
+
+allowBuilds:
+  # Sentry source-map uploader binary: not used (no withSentryConfig build step).
+  "@sentry/cli": false
+  esbuild: true
+  pre-commit: set this to true or false
+  spawn-sync: set this to true or false
+  unrs-resolver: true

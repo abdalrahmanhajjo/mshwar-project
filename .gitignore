@@ -1,0 +1,115 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production
+dist/
+build/
+.next/
+out/
+
+# Testing
+coverage/
+.nyc_output
+coverage.xml
+htmlcov/
+storybook-static/
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local env files - NEVER commit real secrets
+.env
+.env.local
+.env.staging
+.env.production
+.env*.local
+.env*.staging
+.env*.production
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual Environment
+venv/
+.env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+
+# Logs
+*.log
+
+# Docker
+docker-compose.override.yml
+
+# Pre-commit
+.husky/
+
+# Misc
+*.lock
+
+# Secrets and credentials
+*.secret
+*.key
+*.p12
+*.pfx
+*.pem
+credentials.json
+service-account.json
+
+# Coverage artifacts
+coverage.xml
+gitleaks-results.sarif
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# API specific
+services/api/.env
+services/api/.env.local
+services/api/.env.staging
+services/api/.env.production
+
+# Pre-built artifacts
+services/api/coverage/
+services/api/htmlcov/
+services/api/.coverage
+services/api/coverage.xml
+services/api/*.egg-info/
+
+# Local tool output (AI assistants, file transfers)
+
+# Sentry build plugin auth token (never commit)
+.env.sentry-build-plugin

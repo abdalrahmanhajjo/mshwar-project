@@ -1,0 +1,62 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: debug-statements
+      - id: mixed-line-ending
+      - id: check-added-large-files
+      - id: check-merge-conflict
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.7
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+        files: \.py$
+      - id: ruff-format
+        files: \.py$
+
+  - repo: https://github.com/prettier/prettier
+    rev: 3.5.3
+    hooks:
+      - id: prettier
+        args: ["--write"]
+
+  - repo: local
+    hooks:
+      - id: pnpm-lint
+        name: pnpm lint
+        entry: pnpm run lint
+        language: system
+        files: \.(ts|tsx|js|jsx)$
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: pnpm-typecheck
+        name: pnpm typecheck
+        entry: pnpm run typecheck
+        language: system
+        files: \.(ts|tsx)$
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: mypy-typecheck
+        name: mypy typecheck
+        entry: mypy services/api/app/
+        language: system
+        files: \.py$
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: commitlint
+        name: commitlint
+        entry: npx --yes commitlint --from HEAD~1 --to HEAD
+        language: node
+        stages: [commit-msg]

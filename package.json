@@ -1,0 +1,31 @@
+{
+  "name": "mshwar",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mshwar — AI-Powered Lebanon Trip & Experience Platform",
+  "scripts": {
+    "dev": "docker compose up --build",
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api dev",
+    "build": "pnpm --filter web build",
+    "lint": "pnpm --filter web lint && pnpm --filter api lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "i18n:check": "pnpm --filter web i18n:check",
+    "typecheck": "pnpm --filter web typecheck && pnpm --filter api typecheck",
+    "test": "pnpm --filter web test && pnpm tokens:test && pnpm --filter api test",
+    "tokens:generate": "node mshwar-brand-foundation/scripts/generate-tokens.mjs && node mshwar-brand-foundation/scripts/assert-contrast.mjs --write",
+    "tokens:check": "node mshwar-brand-foundation/scripts/generate-tokens.mjs --check && node mshwar-brand-foundation/scripts/assert-contrast.mjs",
+    "tokens:contrast": "node mshwar-brand-foundation/scripts/assert-contrast.mjs",
+    "tokens:test": "node --test mshwar-brand-foundation/scripts/generate-tokens.test.mjs mshwar-brand-foundation/scripts/assert-contrast.test.mjs mshwar-brand-foundation/scripts/figma-54-screens.test.mjs",
+    "precommit": "pre-commit run --all-files",
+    "clean": "rm -rf node_modules apps/web/node_modules apps/web/.next",
+    "db:test": "cd mshwar-database && npm ci && npm test"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^9.0.1",
+    "prettier": "^3.5.3"
+  },
+  "packageManager": "pnpm@11.15.1"
+}

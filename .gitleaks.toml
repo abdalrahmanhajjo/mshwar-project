@@ -1,0 +1,58 @@
+title = "Mshwar gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Docs, lockfiles, generated config, and placeholder env examples"
+paths = [
+  '''(?i)\.md$''',
+  '''(?i)\.json$''',
+  '''(?i)\.(ya?ml|toml)$''',
+  '''(^|/)Dockerfile$''',
+  '''(^|/)package\.json$''',
+  '''(^|/)pnpm-lock\.yaml$''',
+  '''(^|/)pyproject\.toml$''',
+  '''(^|/)requirements\.txt$''',
+  '''(^|/)\.github/workflows/''',
+  '''(^|/)docs/''',
+  '''(^|/)scripts/''',
+  '''(^|/)services/api/scripts/''',
+  '''(?i)\.test\.py$''',
+  '''(^|/)test_[^/]*\.py$''',
+  '''(?i)\.spec\.ts$''',
+  '''(?i)\.test\.ts$''',
+  '''(^|/)conftest\.py$''',
+  '''(^|/)__pycache__/''',
+  '''(^|/)\.next/''',
+  '''(^|/)node_modules/''',
+  '''(^|/)coverage/''',
+  '''(?i)\.coverage$''',
+  '''(^|/)coverage\.xml$''',
+  '''(^|/)\.env\.example$''',
+]
+
+[[rules]]
+id = "mshwar-stripe-key"
+description = "Stripe secret or restricted key"
+regex = '''(?i)(sk|rk)_(live|test)_[a-zA-Z0-9]{24}'''
+
+[[rules]]
+id = "mshwar-google-api-key"
+description = "Google API key"
+regex = '''AIza[0-9A-Za-z\-_]{35}'''
+
+[[rules]]
+id = "mshwar-aws-access-key"
+description = "AWS access key or secret key name"
+regex = '''(AKIA[0-9A-Z]{16}|aws_secret_access_key)'''
+
+[[rules]]
+id = "mshwar-github-token"
+description = "GitHub personal access token"
+regex = '''(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9_]+)'''
+
+[[rules]]
+id = "mshwar-generic-secret-assignment"
+description = "High-entropy secret assigned to a common key name"
+regex = '''(?i)(password|secret|api_key|token)\s*[=:]\s*['"][a-zA-Z0-9]{16,}['"]'''
