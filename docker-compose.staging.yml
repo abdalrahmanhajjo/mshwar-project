@@ -1,0 +1,81 @@
+# Staging overrides for the local development stack.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+#
+# What this changes, and why:
+#   * the API connects as the restricted mshwar_api role, not as postgres (SR-02)
+#   * no --reload, no source bind mount, no dev endpoints
+#   * Redis persists, because rate limits and the AI spend ceiling depend on it (SR-07)
+#   * nothing but the reverse proxy is exposed to the host
+#
+# Values come from /opt/mshwar/.env on the staging box. That file is never committed.
+services:
+  db:
+    ports: !override []
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./ops/db-backups:/backups
+
+  redis:
+    ports: !override []
+    command: ["redis-server", "--save", "60", "1000", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+  migrate:
+    volumes:
+      - ./mshwar-database:/mshwar-database:ro
+    environment:
+      # Migrations run as the owner; the API does not.
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+
+  api:
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    # The root .env is what Compose interpolates ${VAR} from; it is NOT passed into
+    # the container automatically. Load it so SECRET_KEY, INTERNAL_JOB_TOKEN,
+    # PUBLIC_WEB_ORIGIN and the rest reach the app. The explicit environment block
+    # below still wins over anything with the same name in the file.
+    env_file:
+      - path: .env
+        required: true
+    ports: !override []
+    volumes: !override []
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${MSHWAR_API_USER:?set in .env}:${MSHWAR_API_PASSWORD:?set in .env}@db:5432/${POSTGRES_DB}
+      ENVIRONMENT: staging
+      ENABLE_DEV_ENDPOINTS: "false"
+      RATE_LIMIT_STORE: redis
+
+  web:
+    restart: unless-stopped
+    # Only Caddy is public; reach the web app through it, not on port 3000.
+    ports: !override []
+
+  # Terminates TLS and is the only service published to the host. Certificates are
+  # obtained from Let's Encrypt automatically, so SITE_ADDRESS must be a hostname
+  # that resolves to this box and must match PUBLIC_WEB_ORIGIN in .env.
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?set in .env}
+    volumes:
+      - ./ops/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+      - web
+
+volumes:
+  redis_data:
+  caddy_data:
+  caddy_config:

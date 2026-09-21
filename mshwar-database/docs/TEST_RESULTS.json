@@ -1,0 +1,259 @@
+{
+  "engine": "PostgreSQL 18.3 (PGlite 0.5.8) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+  "migrations": 26,
+  "passed": 62,
+  "tests": [
+    {
+      "name": "all app tables have forced RLS",
+      "status": "PASS"
+    },
+    {
+      "name": "PostGIS distance uses meters",
+      "status": "PASS"
+    },
+    {
+      "name": "pgvector cosine operator available",
+      "status": "PASS"
+    },
+    {
+      "name": "cross-organization venue assignment rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "overlapping price periods rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "negative prices rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "incomplete range price rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "invalid capacity rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "actor spoof in reservation rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "atomic reservation calculates 2 x USD 25 and allocates capacity",
+      "status": "PASS"
+    },
+    {
+      "name": "idempotent retry returns original booking",
+      "status": "PASS"
+    },
+    {
+      "name": "idempotency conflict rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "no remaining capacity rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "unpaid confirmation rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "booking price snapshot immutable",
+      "status": "PASS"
+    },
+    {
+      "name": "booked slot time immutable",
+      "status": "PASS"
+    },
+    {
+      "name": "counter cannot drift from reservations",
+      "status": "PASS"
+    },
+    {
+      "name": "payment amount mismatch rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "settled payment permits confirmation",
+      "status": "PASS"
+    },
+    {
+      "name": "payment settlement cannot regress",
+      "status": "PASS"
+    },
+    {
+      "name": "invalid booking transition rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "completion before service ends rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "review before completed interaction rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "refund above paid amount rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "partial refund is separate from booking state",
+      "status": "PASS"
+    },
+    {
+      "name": "aggregate refunds cannot exceed settlement",
+      "status": "PASS"
+    },
+    {
+      "name": "cancellation releases seats and flags outstanding refund",
+      "status": "PASS"
+    },
+    {
+      "name": "repeated cancellation does not release twice",
+      "status": "PASS"
+    },
+    {
+      "name": "expiry releases hold and allows new reservation",
+      "status": "PASS"
+    },
+    {
+      "name": "stale instant inventory downgrades to request",
+      "status": "PASS"
+    },
+    {
+      "name": "booking state changes enqueue durable notifications",
+      "status": "PASS"
+    },
+    {
+      "name": "audit rows cannot be deleted",
+      "status": "PASS"
+    },
+    {
+      "name": "other business reader cannot see Alice booking",
+      "status": "PASS"
+    },
+    {
+      "name": "customer reader sees own booking history",
+      "status": "PASS"
+    },
+    {
+      "name": "reader cannot mutate bookings",
+      "status": "PASS"
+    },
+    {
+      "name": "reader cannot call booking transition",
+      "status": "PASS"
+    },
+    {
+      "name": "private functions do not grant PUBLIC execution",
+      "status": "PASS"
+    },
+    {
+      "name": "duplicate webhook rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "trusted backend booking path works with RLS enabled",
+      "status": "PASS"
+    },
+    {
+      "name": "sealing requires deterministic validation",
+      "status": "PASS"
+    },
+    {
+      "name": "validated itinerary seals successfully",
+      "status": "PASS"
+    },
+    {
+      "name": "sealed stop cannot change",
+      "status": "PASS"
+    },
+    {
+      "name": "sealed itinerary cannot be unsealed",
+      "status": "PASS"
+    },
+    {
+      "name": "sealed itinerary cannot gain stops",
+      "status": "PASS"
+    },
+    {
+      "name": "strict itinerary budget enforced",
+      "status": "PASS"
+    },
+    {
+      "name": "overlapping itinerary stops rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "view-only group member cannot vote",
+      "status": "PASS"
+    },
+    {
+      "name": "voting member can vote once",
+      "status": "PASS"
+    },
+    {
+      "name": "duplicate vote rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "locked trip vote cannot change",
+      "status": "PASS"
+    },
+    {
+      "name": "duplicate favorite rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "sealed evaluation dataset cannot gain cases",
+      "status": "PASS"
+    },
+    {
+      "name": "audit entries record actor, action and request id",
+      "status": "PASS"
+    },
+    {
+      "name": "audit entries cannot be edited",
+      "status": "PASS"
+    },
+    {
+      "name": "audit entries cannot be deleted",
+      "status": "PASS"
+    },
+    {
+      "name": "audit log cannot be truncated",
+      "status": "PASS"
+    },
+    {
+      "name": "AI spend stops at the per-person daily ceiling",
+      "status": "PASS"
+    },
+    {
+      "name": "platform AI ceiling applies to everyone",
+      "status": "PASS"
+    },
+    {
+      "name": "consent changes are logged with their source",
+      "status": "PASS"
+    },
+    {
+      "name": "saved preferences apply only with personalisation consent",
+      "status": "PASS"
+    },
+    {
+      "name": "policy acceptance must name the current version",
+      "status": "PASS"
+    },
+    {
+      "name": "accepting current policies clears the pending list",
+      "status": "PASS"
+    }
+  ],
+  "limitations": [
+    "Single connection embedded PostgreSQL; native multi-session concurrency and PostgreSQL 17 deployment still require validation.",
+    "No external auth, payment, email or routing services exercised."
+  ]
+}

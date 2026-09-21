@@ -1,0 +1,15 @@
+# Runtime dependencies (keep in sync with pyproject.toml [project.dependencies]).
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+sqlalchemy[asyncio]>=2.0.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+python-dotenv>=1.0.0
+psycopg[binary]>=3.3.5
+asyncpg>=0.29.0
+httpx>=0.28.0
+argon2-cffi>=23.1.0
+# Shared rate-limit store (required when deployed; tests fall back to memory).
+redis>=5.0
+# Error reporting; inactive until SENTRY_DSN is set.
+sentry-sdk[fastapi]>=2.0

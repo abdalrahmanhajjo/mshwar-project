@@ -1,0 +1,15 @@
+{
+  "name": "api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "pnpm entry points for the Python API. Needs Python 3.11 with requirements-dev.txt installed.",
+  "scripts": {
+    "dev": "uvicorn app.main:app --reload --port 8000",
+    "lint": "ruff check . && ruff format --check .",
+    "format": "ruff format . && ruff check --fix .",
+    "typecheck": "mypy --config-file ../../mypy.ini app",
+    "test": "python -m pytest tests",
+    "migrate": "python scripts/migrate.py",
+    "seed": "python scripts/seed.py"
+  }
+}

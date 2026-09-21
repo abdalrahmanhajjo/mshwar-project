@@ -1,0 +1,93 @@
+name: Security
+
+# MSHWAR-114: dependency, static-analysis and container scans.
+# Runs on every pull request, on main, and every Monday so new advisories are caught.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "11.15.1"
+
+jobs:
+  web-dependency-audit:
+    name: Web Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+      - name: Production dependencies (blocking)
+        run: |
+          pnpm audit --prod --audit-level moderate
+          pnpm --dir apps/web audit --prod --audit-level moderate
+      - name: All dependencies, including test tooling (report only; see review SR-15)
+        continue-on-error: true
+        run: pnpm --dir apps/web audit --audit-level low
+
+  semgrep:
+    name: Static Analysis (Semgrep)
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:1.177.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan API and web source
+        env:
+          SEMGREP_SEND_METRICS: "off"
+        run: >-
+          semgrep scan
+          --config p/python --config p/typescript --config p/react
+          --config p/owasp-top-ten --config p/secrets
+          --severity ERROR --error
+          --exclude "*.test.ts" --exclude "*.test.tsx" --exclude "tests"
+          --sarif --output semgrep.sarif
+          services/api/app apps/web/src
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-sarif
+          path: semgrep.sarif
+          retention-days: 14
+
+  container-scan:
+    name: Container Scan (${{ matrix.image }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: api
+            context: services/api
+            dockerfile: services/api/Dockerfile
+          - image: web
+            context: .
+            dockerfile: apps/web/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t mshwar-${{ matrix.image }}:scan -f ${{ matrix.dockerfile }} ${{ matrix.context }}
+      # trivy-action 0.35.0 is an immutable release; earlier tags were hijacked in March 2026
+      # (GHSA-69fq-xp46-6x23). Keep this pinned, and never use Trivy 0.69.4-0.69.6.
+      - name: Scan for fixable high and critical vulnerabilities
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          version: v0.69.3
+          image-ref: mshwar-${{ matrix.image }}:scan
+          scanners: vuln,secret
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          format: table
