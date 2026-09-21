@@ -18,11 +18,7 @@ export const PROTECTED_PATHS = [
   /^\/saved(?:\/|$)/,
   /^\/trips(?:\/|$)/,
   /^\/favorites(?:\/|$)/,
-  /^\/bookings(?:\/|$)/,
-  /^\/notifications(?:\/|$)/,
   /^\/settings(?:\/|$)/,
-  /^\/business(?:\/|$)/,
-  /^\/admin(?:\/|$)/,
 ];
 
 export function isProtectedPath(pathname: string): boolean {

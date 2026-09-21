@@ -2,21 +2,20 @@ import { describe, expect, it } from "vitest";
 import { isProtectedPath, isAdminUser, safeNextPath } from "./auth";
 
 describe("auth helpers", () => {
-  it("marks traveller account routes and portals as protected", () => {
+  it("marks the traveller account routes as protected", () => {
     expect(isProtectedPath("/plan")).toBe(true);
     expect(isProtectedPath("/saved/list")).toBe(true);
     expect(isProtectedPath("/trips")).toBe(true);
     expect(isProtectedPath("/favorites")).toBe(true);
-    expect(isProtectedPath("/bookings")).toBe(true);
-    expect(isProtectedPath("/notifications")).toBe(true);
     expect(isProtectedPath("/ar/favorites")).toBe(true);
     expect(isProtectedPath("/settings")).toBe(true);
-    expect(isProtectedPath("/business/listings")).toBe(true);
-    expect(isProtectedPath("/admin/users")).toBe(true);
     expect(isAdminUser({ id: "1", email: "a@b.c", display_name: "A", locale: "en", admin_tier: "elevated" })).toBe(
       true,
     );
     expect(isProtectedPath("/")).toBe(false);
+    // Phase 2 surfaces are not routes in this milestone, so they are not gated.
+    expect(isProtectedPath("/business/listings")).toBe(false);
+    expect(isProtectedPath("/admin/users")).toBe(false);
     expect(isProtectedPath("/unsubscribe/token")).toBe(false);
     expect(isProtectedPath("/signin")).toBe(false);
     expect(isProtectedPath("/forgot-password")).toBe(false);
