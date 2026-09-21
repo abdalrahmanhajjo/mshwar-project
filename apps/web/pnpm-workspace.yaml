@@ -1,0 +1,9 @@
+packages:
+  - "."
+
+allowBuilds:
+  # Sentry source-map uploader binary: not used (no withSentryConfig build step).
+  "@sentry/cli": false
+  esbuild: true
+  sharp: false
+  unrs-resolver: false
