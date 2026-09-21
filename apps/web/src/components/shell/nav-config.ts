@@ -1,11 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import {
-  Compass,
-  Heart,
-  MapPin,
-  Route,
-  Sparkles,
-} from "lucide-react";
+import { Compass, Heart, MapPin, Route, Sparkles } from "lucide-react";
 import type { MessageKey } from "@/lib/messages";
 
 export type ShellSurface = "traveller";

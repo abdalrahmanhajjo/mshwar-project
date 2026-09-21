@@ -5,14 +5,7 @@ import { LOCALES } from "@/lib/locale";
 describe("message catalogue parity", () => {
   it("registers every Phase 1 surface catalogue", () => {
     expect(Object.keys(catalogueRegistry).sort()).toEqual(
-      [
-        "browseCopy",
-        "checkoutCopy",
-        "hubCopy",
-        "messages",
-        "plannerCopy",
-        "privacyCopy",
-      ].sort(),
+      ["browseCopy", "checkoutCopy", "hubCopy", "messages", "plannerCopy", "privacyCopy"].sort(),
     );
   });
 

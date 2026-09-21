@@ -44,31 +44,31 @@ export function AppShell({ surface, children, auth, currentPath }: AppShellProps
         {t("skipToContent")}
       </a>
 
-        <header className="sticky top-0 z-40 border-b border-border-subtle bg-surface/85 backdrop-blur-md">
-          <div className="shell-frame grid min-h-16 grid-cols-[1fr_auto] items-center gap-3 py-2 lg:min-h-[4.5rem] lg:grid-cols-[1fr_auto_1fr]">
-            <div className="flex min-w-0 items-center gap-2">
-              <MobileNav items={items} pathname={activePath} auth={auth} />
-              <BrandMark href={homeHref} compact />
-            </div>
-            <nav aria-label={t("menu")} className="hidden items-center gap-1 lg:flex">
-              {items.map((item) => (
-                <NavLink key={item.href} item={item} pathname={activePath} />
-              ))}
-            </nav>
-            <div className="flex items-center justify-end gap-1.5 sm:gap-3">
-              <LanguageSwitcher compact />
-              <div className="hidden lg:block">
-                <AuthStatus auth={auth} />
-              </div>
+      <header className="sticky top-0 z-40 border-b border-border-subtle bg-surface/85 backdrop-blur-md">
+        <div className="shell-frame grid min-h-16 grid-cols-[1fr_auto] items-center gap-3 py-2 lg:min-h-[4.5rem] lg:grid-cols-[1fr_auto_1fr]">
+          <div className="flex min-w-0 items-center gap-2">
+            <MobileNav items={items} pathname={activePath} auth={auth} />
+            <BrandMark href={homeHref} compact />
+          </div>
+          <nav aria-label={t("menu")} className="hidden items-center gap-1 lg:flex">
+            {items.map((item) => (
+              <NavLink key={item.href} item={item} pathname={activePath} />
+            ))}
+          </nav>
+          <div className="flex items-center justify-end gap-1.5 sm:gap-3">
+            <LanguageSwitcher compact />
+            <div className="hidden lg:block">
+              <AuthStatus auth={auth} />
             </div>
           </div>
-        </header>
-        <PolicyUpdateBanner />
-        <VerificationBanner />
-        <main id="main" className="min-w-0 flex-1">
-          {children}
-        </main>
-        <ShellFooter surface={surface} />
+        </div>
+      </header>
+      <PolicyUpdateBanner />
+      <VerificationBanner />
+      <main id="main" className="min-w-0 flex-1">
+        {children}
+      </main>
+      <ShellFooter surface={surface} />
     </div>
   );
 }
@@ -76,8 +76,6 @@ export function AppShell({ surface, children, auth, currentPath }: AppShellProps
 export function TravellerShell(props: Omit<AppShellProps, "surface">) {
   return <AppShell surface="traveller" {...props} />;
 }
-
-
 
 export function ShellMain({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (

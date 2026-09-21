@@ -9,16 +9,16 @@ from the complete implementation at
 
 ## What Phase 1 contains
 
-| Area | Included |
-| --- | --- |
-| Foundation & platform setup | Monorepo, database, migrations, seed toolkit, CI gates |
-| Design system & UI foundation | Brand tokens, component library, responsive traveller shell |
-| Accounts, identity & preferences | Registration, sign-in, recovery, email verification, profile, account hub, data export and deletion |
-| Catalogue, search & discovery | Businesses, experiences, categories, media, browse, search, map, listing detail, favorites, collections |
-| Maps, routing & weather | Travel-time routing, start-location picker, multi-stop optimisation, forecasts and weather warnings |
-| Trip builder | Intent extraction, candidate retrieval, eligibility, ranking, itinerary assembly and costing, manual builder, versioning |
-| Localization, RTL & accessibility | en / ar / fr catalogues, Arabic RTL, WCAG 2.2 AA |
-| Security, privacy & trust | Per-endpoint authorisation, audit log, rate limiting, log scrubbing, consent and policy flows |
+| Area                              | Included                                                                                                                 |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Foundation & platform setup       | Monorepo, database, migrations, seed toolkit, CI gates                                                                   |
+| Design system & UI foundation     | Brand tokens, component library, responsive traveller shell                                                              |
+| Accounts, identity & preferences  | Registration, sign-in, recovery, email verification, profile, account hub, data export and deletion                      |
+| Catalogue, search & discovery     | Businesses, experiences, categories, media, browse, search, map, listing detail, favorites, collections                  |
+| Maps, routing & weather           | Travel-time routing, start-location picker, multi-stop optimisation, forecasts and weather warnings                      |
+| Trip builder                      | Intent extraction, candidate retrieval, eligibility, ranking, itinerary assembly and costing, manual builder, versioning |
+| Localization, RTL & accessibility | en / ar / fr catalogues, Arabic RTL, WCAG 2.2 AA                                                                         |
+| Security, privacy & trust         | Per-endpoint authorisation, audit log, rate limiting, log scrubbing, consent and policy flows                            |
 
 ## What Phase 2 will add
 

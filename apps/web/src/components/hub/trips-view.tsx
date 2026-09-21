@@ -1,17 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Archive,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  List,
-  Lock,
-  Plus,
-  Route,
-  SearchX,
-} from "lucide-react";
+import { Archive, CalendarDays, ChevronLeft, ChevronRight, List, Lock, Plus, Route, SearchX } from "lucide-react";
 import { HubFrame } from "@/components/hub/hub-nav";
 import { HubLoading, HubPagination } from "@/components/hub/hub-pagination";
 import { useHubPage } from "@/components/hub/use-hub-page";
@@ -366,13 +356,7 @@ export function TripsView() {
           ) : null}
           <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {data.items.map((trip) => (
-              <TripCard
-                key={trip.id}
-                trip={trip}
-                copy={copy}
-                locale={locale}
-                onArchive={(t) => void onArchive(t)}
-              />
+              <TripCard key={trip.id} trip={trip} copy={copy} locale={locale} onArchive={(t) => void onArchive(t)} />
             ))}
           </ul>
           <HubPagination page={page} total={data.total} onPage={(next) => void load(next)} />

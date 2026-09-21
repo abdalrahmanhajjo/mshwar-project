@@ -83,7 +83,6 @@ test.describe("MSHWAR-26 responsive app shell", () => {
       page.getByRole("navigation", { name: "Menu" }).getByRole("link", { name: "Plan a trip" }),
     ).toBeVisible();
   });
-
 });
 
 test.describe("MSHWAR-29 recovery routes", () => {
