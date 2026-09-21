@@ -4,6 +4,7 @@ from app.api.v1.endpoints import (
     auth,
     catalogue,
     favorites,
+    groups,
     health,
     locations,
     planner,
@@ -23,3 +24,4 @@ router.include_router(planner.router, prefix="/planner", tags=["planner"])
 router.include_router(catalogue.router, prefix="/catalogue", tags=["catalogue"])
 router.include_router(trips.router, prefix="/trips", tags=["trips"])
 router.include_router(favorites.router, prefix="/favorites", tags=["favorites"])
+router.include_router(groups.router, prefix="/groups", tags=["groups"])

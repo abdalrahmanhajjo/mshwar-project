@@ -1,7 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { Archive, CalendarDays, ChevronLeft, ChevronRight, List, Lock, Plus, Route, SearchX } from "lucide-react";
+import {
+  Archive,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  LayoutDashboard,
+  List,
+  Lock,
+  Plus,
+  Route,
+  SearchX,
+} from "lucide-react";
 import { HubFrame } from "@/components/hub/hub-nav";
 import { HubLoading, HubPagination } from "@/components/hub/hub-pagination";
 import { useHubPage } from "@/components/hub/use-hub-page";
@@ -12,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Notice } from "@/components/ui/notice";
 import { formatDate, formatPlural } from "@/i18n/format";
+import { useGroupCopy } from "@/lib/group-copy";
 import { archiveTrip, fetchAllTrips, fetchTrips, type TripRecord } from "@/lib/hub";
 import { useHubCopy } from "@/lib/hub-copy";
 import { cn, focusRing } from "@/lib/utils";
@@ -44,6 +56,7 @@ function TripCard({
   locale: Locale;
   onArchive: (trip: TripRecord) => void;
 }) {
+  const groupCopy = useGroupCopy();
   const locked = trip.status === "locked";
   return (
     <li
@@ -93,6 +106,12 @@ function TripCard({
             <LocaleLink href={`/plan?trip=${trip.id}`}>
               <Route aria-hidden />
               {copy.openTrip}
+            </LocaleLink>
+          </Button>
+          <Button asChild size="sm" variant="outline">
+            <LocaleLink href={`/trips/${trip.id}`}>
+              <LayoutDashboard aria-hidden />
+              {groupCopy.openGroup}
             </LocaleLink>
           </Button>
           {trip.status === "archived" ? null : (

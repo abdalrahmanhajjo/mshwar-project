@@ -5,11 +5,13 @@ The policy model is described in [authorization.md](authorization.md).
 
 | Policy | Routes |
 |---|---|
+| `actor` | 12 |
 | `admin` | 6 |
 | `job` | 1 |
 | `public` | 19 |
-| `session` | 44 |
-| **Total** | **70** |
+| `session` | 45 |
+| `token` | 2 |
+| **Total** | **85** |
 
 | Method | Path | Policy |
 |---|---|---|
@@ -38,6 +40,21 @@ The policy model is described in [authorization.md](authorization.md).
 | POST | `/api/v1/favorites/merge` | `session` |
 | POST | `/api/v1/favorites/toggle` | `session` |
 | DELETE | `/api/v1/favorites/{favorite_id}` | `session` |
+| GET | `/api/v1/groups/join/{token}` | `token` |
+| POST | `/api/v1/groups/join/{token}` | `token` |
+| POST | `/api/v1/groups/share-links/{link_id}/revoke` | `actor` |
+| GET | `/api/v1/groups/trips/{trip_id}` | `actor` |
+| GET | `/api/v1/groups/trips/{trip_id}/itinerary` | `actor` |
+| POST | `/api/v1/groups/trips/{trip_id}/lock` | `actor` |
+| GET | `/api/v1/groups/trips/{trip_id}/participants` | `actor` |
+| GET | `/api/v1/groups/trips/{trip_id}/share-links` | `actor` |
+| POST | `/api/v1/groups/trips/{trip_id}/share-links` | `session` |
+| PUT | `/api/v1/groups/trips/{trip_id}/shared-preferences` | `actor` |
+| GET | `/api/v1/groups/trips/{trip_id}/suggestions` | `actor` |
+| POST | `/api/v1/groups/trips/{trip_id}/suggestions` | `actor` |
+| GET | `/api/v1/groups/trips/{trip_id}/summary` | `actor` |
+| GET | `/api/v1/groups/trips/{trip_id}/tally` | `actor` |
+| PUT | `/api/v1/groups/trips/{trip_id}/votes` | `actor` |
 | GET | `/api/v1/health` | `public` |
 | GET | `/api/v1/health/metrics` | `job` |
 | GET | `/api/v1/locations/areas` | `public` |
