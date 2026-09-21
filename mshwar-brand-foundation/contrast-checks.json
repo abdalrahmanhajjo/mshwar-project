@@ -1,0 +1,83 @@
+{
+  "$description": "In-use token pairings asserted by pnpm tokens:contrast. Ratios are recomputed from design-tokens.json — do not treat stored notes as the live source. Forbidden pairings are documented so they are never used as product text.",
+  "standard": "WCAG 2.2 AA",
+  "thresholds": {
+    "text": 4.5,
+    "large-text": 3,
+    "non-text": 3
+  },
+  "textOnSurfaces": [
+    { "foreground": "text.primary", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "text.muted", "usage": "text", "minRatio": 4.5 }
+  ],
+  "fillPairs": [
+    { "foreground": "text.inverse", "background": "brand.default", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "brand.foreground", "background": "brand.default", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "accent.foreground", "background": "accent.default", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "text.onAccent", "background": "accent.default", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "danger.foreground", "background": "danger.default", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "success.foreground", "background": "success.default", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "warning.foreground", "background": "warning.default", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "danger.default", "background": "danger.subtle", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "success.default", "background": "success.subtle", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "warning.default", "background": "warning.subtle", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "accent.strong", "background": "accent.subtle", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "text.primary", "background": "brand.subtle", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "text.muted", "background": "brand.subtle", "usage": "text", "minRatio": 4.5 }
+  ],
+  "statusOnSurfaces": [
+    { "foreground": "danger.default", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "success.default", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "warning.default", "usage": "text", "minRatio": 4.5 },
+    { "foreground": "accent.strong", "usage": "text", "minRatio": 4.5 }
+  ],
+  "nonTextOnSurfaces": [
+    { "foreground": "border.default", "minRatio": 3 },
+    { "foreground": "border.strong", "minRatio": 3 },
+    { "foreground": "focus.ring", "minRatio": 3 }
+  ],
+  "extra": [
+    {
+      "id": "light-focus-on-accent-fill",
+      "foreground": "color.light.focus.ring",
+      "background": "color.light.accent.default",
+      "usage": "non-text",
+      "minRatio": 3,
+      "note": "Focus ring on an orange control must meet WCAG 1.4.11"
+    },
+    {
+      "id": "dark-focus-on-accent-fill",
+      "foreground": "color.dark.focus.ring",
+      "background": "color.dark.accent.default",
+      "usage": "non-text",
+      "minRatio": 3,
+      "note": "Focus ring on an orange control must meet WCAG 1.4.11"
+    }
+  ],
+  "forbidden": [
+    {
+      "id": "white-on-accent",
+      "foreground": "primitive.color.white",
+      "background": "primitive.color.orange",
+      "usage": "text",
+      "minRatio": 4.5,
+      "note": "Fails AA for small text. Use accent.foreground, never white, on orange fills."
+    },
+    {
+      "id": "cedar-on-accent",
+      "foreground": "primitive.color.cedar",
+      "background": "primitive.color.orange",
+      "usage": "text",
+      "minRatio": 4.5,
+      "note": "Fails AA for small text (passes large text only). Use accent.foreground."
+    },
+    {
+      "id": "accent-as-small-text-on-canvas",
+      "foreground": "color.light.accent.default",
+      "background": "color.light.surface.canvas",
+      "usage": "text",
+      "minRatio": 4.5,
+      "note": "Orange is a fill, not small text. Do not use text-accent for body or labels."
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mshwar.app/design-tokens.schema.json",
+  "title": "Mshwar design tokens",
+  "type": "object",
+  "required": ["meta", "primitive", "color", "typography", "spacing", "radius", "elevation", "motion"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["name", "version"]
+    },
+    "primitive": {
+      "type": "object",
+      "required": ["color"]
+    },
+    "color": {
+      "type": "object",
+      "required": ["light", "dark"],
+      "additionalProperties": false,
+      "properties": {
+        "light": { "$ref": "#/$defs/semanticColorSet" },
+        "dark": { "$ref": "#/$defs/semanticColorSet" }
+      }
+    },
+    "typography": { "type": "object" },
+    "spacing": { "type": "object" },
+    "radius": { "type": "object" },
+    "elevation": {
+      "type": "object",
+      "required": ["light", "dark"]
+    },
+    "motion": { "type": "object" },
+    "layout": { "type": "object" },
+    "icon": { "type": "object" },
+    "alias": { "type": "object" }
+  },
+  "$defs": {
+    "semanticColorSet": {
+      "type": "object",
+      "required": ["surface", "text", "accent", "brand", "border", "danger", "success", "warning", "focus"]
+    }
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "prebuild": "node ../../mshwar-brand-foundation/scripts/generate-tokens.mjs",
+    "build": "next build",
+    "tokens:generate": "node ../../mshwar-brand-foundation/scripts/generate-tokens.mjs",
+    "start": "next start",
+    "lint": "eslint",
+    "format": "prettier --write --ignore-path ../../.prettierignore \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check --ignore-path ../../.prettierignore \"src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "i18n:check": "node scripts/check-i18n.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:coverage": "vitest run --coverage",
+    "test:ci": "vitest run --coverage --reporter=json",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build -o storybook-static"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-label": "^2.1.15",
+    "@radix-ui/react-popover": "^1.1.23",
+    "@radix-ui/react-select": "^2.3.7",
+    "@radix-ui/react-separator": "^1.1.15",
+    "@radix-ui/react-slider": "^1.4.7",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-tabs": "^1.1.21",
+    "@radix-ui/react-toast": "^1.2.23",
+    "@sentry/nextjs": "~10.74.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.468.0",
+    "next": "16.3.5",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tailwind-merge": "^2.5.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.46.0",
+    "@storybook/addon-a11y": "^10.6.0",
+    "@storybook/react-vite": "^10.6.0",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/coverage-v8": "^2.1.8",
+    "axe-core": "^4.13.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.5",
+    "jsdom": "^25.0.1",
+    "prettier": "^3.3.3",
+    "storybook": "^10.6.0",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vite": "^8.3.0",
+    "vitest": "^2.1.8",
+    "vitest-axe": "^0.1.0"
+  },
+  "packageManager": "pnpm@11.15.1",
+  "vitest": {
+    "test": {
+      "environment": "jsdom",
+      "include": [
+        "src/**/*.test.{ts,tsx}"
+      ],
+      "setupFiles": [
+        "./src/vitest-setup.ts"
+      ],
+      "coverage": {
+        "provider": "v8",
+        "reporter": [
+          "text",
+          "json",
+          "html"
+        ],
+        "reportsDirectory": "./coverage",
+        "exclude": [
+          "**/*.stories.tsx",
+          ".storybook/**",
+          "src/vitest-setup.ts"
+        ],
+        "thresholds": {
+          "lines": 80,
+          "functions": 80,
+          "branches": 80,
+          "statements": 80
+        }
+      }
+    }
+  },
+  "playwright": {
+    "test": {
+      "dir": "src/__tests__/e2e",
+      "timeout": 30000,
+      "use": {
+        "baseURL": "http://localhost:3000",
+        "trace": "on-first-retry"
+      }
+    }
+  }
+}

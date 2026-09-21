@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 68" width="68" height="68" role="img" aria-label="Mshwar">
+  <rect width="68" height="68" rx="15" fill="#12352F"/>
+  <g transform="translate(0,17)">
+    <path
+      d="M6 29.5V18.2c0-2.3.8-4.4 2.3-6.1l3.9-4.4c2.5-2.8 6.9-2.8 9.4 0l5.6 6.4c1.6 1.8 4.4 1.8 6 0l4.6-5.3c2.5-2.9 7-2.9 9.5 0l6.6 7.6c1.3 1.5 3 2.5 4.9 2.9"
+      fill="none" stroke="#FCFCF8" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="63.4" cy="20.6" r="4.4" fill="#F3653E"/>
+  </g>
+</svg>

@@ -1,0 +1,261 @@
+@import "tailwindcss";
+@import "../styles/generated/tokens.css";
+@import "../styles/generated/tailwind-theme.css";
+
+/*
+ * Bind the self-hosted next/font faces (see app/layout.tsx) in front of the
+ * token stacks so `font-sans` / `font-display` resolve to the loaded files.
+ */
+@theme inline {
+  --font-sans: var(--font-latin-face), "DM Sans", system-ui, sans-serif;
+  --font-display: var(--font-display-face), "Newsreader", Georgia, serif;
+  --font-arabic: var(--font-arabic-face), "Noto Sans Arabic", Tahoma, sans-serif;
+  --animate-rise: rise var(--motion-slow) var(--ease-enter) both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+html {
+  max-width: 100%;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  color: var(--text);
+  background: var(--surface);
+  font-family: var(--font-latin-face), var(--font-latin);
+  font-optical-sizing: auto;
+  min-height: 100vh;
+  max-width: 100%;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html[dir="rtl"] body,
+html[lang="ar"] body {
+  font-family: var(--font-arabic-face), var(--font-arabic);
+}
+
+::selection {
+  background: var(--brand-subtle);
+  color: var(--text);
+}
+
+.shell-gutter {
+  padding-inline: var(--layout-gutter-mobile);
+}
+
+.shell-frame {
+  width: 100%;
+  max-width: min(100%, calc(var(--layout-max-width) + 2 * var(--layout-gutter-desktop)));
+  margin-inline: auto;
+  padding-inline: var(--layout-gutter-mobile);
+}
+
+@media (min-width: 64rem) {
+  .shell-gutter,
+  .shell-frame {
+    padding-inline: var(--layout-gutter-desktop);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.unicode-bidi-isolate {
+  unicode-bidi: isolate;
+}
+
+/* ---------------------------------------------------------------------------
+ * Type scale — shared by every surface so traveller, business and admin
+ * headings read as one product.
+ * ------------------------------------------------------------------------- */
+
+@utility title-hero {
+  font-size: clamp(2.75rem, 1.6rem + 4.6vw, 5.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  font-weight: 560;
+}
+
+@utility title-page {
+  font-size: clamp(2.25rem, 1.55rem + 2.8vw, 3.9rem);
+  line-height: 1.02;
+  letter-spacing: -0.042em;
+  font-weight: 560;
+}
+
+@utility title-section {
+  font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  font-weight: 560;
+}
+
+@utility title-card {
+  font-size: 1.25rem;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-weight: 560;
+}
+
+@utility eyebrow {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+@utility text-serif {
+  font-family: var(--font-display-face), var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+
+/* Photo overlays stay dark in both colour modes so white type always reads. */
+@utility photo-scrim {
+  background-image: linear-gradient(to top, rgb(12 31 28 / 0.86) 0%, rgb(12 31 28 / 0.35) 45%, rgb(12 31 28 / 0) 75%);
+}
+
+@utility photo-scrim-side {
+  background-image: linear-gradient(
+    to right,
+    rgb(12 31 28 / 0.72) 0%,
+    rgb(12 31 28 / 0.35) 45%,
+    rgb(12 31 28 / 0.05) 80%
+  );
+}
+
+@utility photo-tint {
+  background-color: rgb(12 31 28 / 0.28);
+}
+
+@utility photo-tint-strong {
+  background-color: rgb(12 31 28 / 0.55);
+}
+
+@utility surface-grain {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in srgb, var(--text) 5%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 22px 22px;
+}
+
+html[lang="ar"] :is(.title-hero, .title-page, .title-section, .title-card, .eyebrow) {
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+html[dir="rtl"] .photo-scrim-side {
+  background-image: linear-gradient(
+    to left,
+    rgb(12 31 28 / 0.72) 0%,
+    rgb(12 31 28 / 0.35) 45%,
+    rgb(12 31 28 / 0.05) 80%
+  );
+}
+
+html[lang="ar"] .text-serif {
+  font-family: var(--font-arabic-face), var(--font-arabic);
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* Native form controls pick up the brand without bespoke components. */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--brand);
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+/* Data tables used across business and admin consoles. */
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+  text-align: start;
+}
+
+.data-table th {
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: start;
+  white-space: nowrap;
+}
+
+.data-table th:first-child {
+  border-start-start-radius: 0.75rem;
+}
+
+.data-table th:last-child {
+  border-start-end-radius: 0.75rem;
+}
+
+.data-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.data-table tbody tr:hover td {
+  background: color-mix(in srgb, var(--surface-sunken) 60%, transparent);
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

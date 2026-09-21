@@ -1,0 +1,263 @@
+{
+  "$description": "Mshwar design tokens — the single source of truth for colour, type, spacing, radius, elevation, motion, layout and iconography. Semantic colour names (surface, accent, danger) are the only colour tokens consumed by product UI. Primitive values are raw brand pigments and must not be referenced from Tailwind or components.",
+  "meta": {
+    "name": "Mshwar",
+    "wordmark": "mshwar",
+    "arabic": "مشوار",
+    "status": "proposed",
+    "version": "1.2.0"
+  },
+  "primitive": {
+    "color": {
+      "cedar": "#12352F",
+      "cedarDeep": "#0C1F1C",
+      "cedarRaised": "#173832",
+      "cedarSunken": "#081614",
+      "orange": "#F3653E",
+      "canvas": "#FCFCF8",
+      "canvasSunken": "#F3F5F2",
+      "slate": "#5E6D66",
+      "slateLight": "#A8B5AF",
+      "white": "#FFFFFF",
+      "border": "#7F8984",
+      "borderDark": "#6A8A84",
+      "error": "#B42318",
+      "errorBright": "#F97066",
+      "errorSubtleLight": "#F8E4E2",
+      "errorSubtleDark": "#3D1A17",
+      "success": "#256D47",
+      "successBright": "#5ECAA0",
+      "successSubtleLight": "#DCEFE6",
+      "successSubtleDark": "#143328",
+      "warning": "#855200",
+      "warningBright": "#F0B429",
+      "warningSubtleLight": "#F7ECD4",
+      "warningSubtleDark": "#3A2A0A",
+      "accentText": "#0C241F",
+      "orangeSubtle": "#FDEBE3",
+      "orangeSubtleDark": "#3D2118",
+      "orangeText": "#B03A17",
+      "orangeTextDark": "#FDBA9F",
+      "cedarSubtle": "#E4EDE7",
+      "cedarSubtleDark": "#1E3F39",
+      "borderSubtle": "#E2E6DF",
+      "borderSubtleDark": "#24403B",
+      "overlayLight": "rgba(18, 53, 47, 0.48)",
+      "overlayDark": "rgba(8, 22, 20, 0.64)"
+    }
+  },
+  "color": {
+    "light": {
+      "surface": {
+        "canvas": "{primitive.color.canvas}",
+        "raised": "{primitive.color.white}",
+        "sunken": "{primitive.color.canvasSunken}",
+        "overlay": "{primitive.color.overlayLight}"
+      },
+      "text": {
+        "primary": "{primitive.color.cedar}",
+        "muted": "{primitive.color.slate}",
+        "inverse": "{primitive.color.canvas}",
+        "onAccent": "{primitive.color.accentText}"
+      },
+      "accent": {
+        "default": "{primitive.color.orange}",
+        "foreground": "{primitive.color.accentText}",
+        "subtle": "{primitive.color.orangeSubtle}",
+        "strong": "{primitive.color.orangeText}"
+      },
+      "brand": {
+        "default": "{primitive.color.cedar}",
+        "foreground": "{primitive.color.canvas}",
+        "subtle": "{primitive.color.cedarSubtle}"
+      },
+      "border": {
+        "default": "{primitive.color.border}",
+        "strong": "{primitive.color.slate}",
+        "subtle": "{primitive.color.borderSubtle}"
+      },
+      "danger": {
+        "default": "{primitive.color.error}",
+        "foreground": "{primitive.color.white}",
+        "subtle": "{primitive.color.errorSubtleLight}"
+      },
+      "success": {
+        "default": "{primitive.color.success}",
+        "foreground": "{primitive.color.white}",
+        "subtle": "{primitive.color.successSubtleLight}"
+      },
+      "warning": {
+        "default": "{primitive.color.warning}",
+        "foreground": "{primitive.color.white}",
+        "subtle": "{primitive.color.warningSubtleLight}"
+      },
+      "focus": {
+        "ring": "{primitive.color.cedar}"
+      }
+    },
+    "dark": {
+      "surface": {
+        "canvas": "{primitive.color.cedarDeep}",
+        "raised": "{primitive.color.cedarRaised}",
+        "sunken": "{primitive.color.cedarSunken}",
+        "overlay": "{primitive.color.overlayDark}"
+      },
+      "text": {
+        "primary": "{primitive.color.canvas}",
+        "muted": "{primitive.color.slateLight}",
+        "inverse": "{primitive.color.cedar}",
+        "onAccent": "{primitive.color.accentText}"
+      },
+      "accent": {
+        "default": "{primitive.color.orange}",
+        "foreground": "{primitive.color.accentText}",
+        "subtle": "{primitive.color.orangeSubtleDark}",
+        "strong": "{primitive.color.orangeTextDark}"
+      },
+      "brand": {
+        "default": "{primitive.color.canvas}",
+        "foreground": "{primitive.color.cedarDeep}",
+        "subtle": "{primitive.color.cedarSubtleDark}"
+      },
+      "border": {
+        "default": "{primitive.color.borderDark}",
+        "strong": "{primitive.color.slateLight}",
+        "subtle": "{primitive.color.borderSubtleDark}"
+      },
+      "danger": {
+        "default": "{primitive.color.errorBright}",
+        "foreground": "{primitive.color.cedarDeep}",
+        "subtle": "{primitive.color.errorSubtleDark}"
+      },
+      "success": {
+        "default": "{primitive.color.successBright}",
+        "foreground": "{primitive.color.cedarDeep}",
+        "subtle": "{primitive.color.successSubtleDark}"
+      },
+      "warning": {
+        "default": "{primitive.color.warningBright}",
+        "foreground": "{primitive.color.cedarDeep}",
+        "subtle": "{primitive.color.warningSubtleDark}"
+      },
+      "focus": {
+        "ring": "{primitive.color.canvas}"
+      }
+    }
+  },
+  "alias": {
+    "color": {
+      "background": "{color.surface}",
+      "foreground": "{color.text}",
+      "card": "{color.surface-raised}",
+      "card-foreground": "{color.text}",
+      "popover": "{color.surface-raised}",
+      "popover-foreground": "{color.text}",
+      "primary": "{color.brand}",
+      "primary-foreground": "{color.brand-foreground}",
+      "secondary": "{color.surface-sunken}",
+      "secondary-foreground": "{color.text}",
+      "muted": "{color.surface-sunken}",
+      "muted-foreground": "{color.text-muted}",
+      "accent": "{color.accent}",
+      "accent-foreground": "{color.accent-foreground}",
+      "destructive": "{color.danger}",
+      "destructive-foreground": "{color.danger-foreground}",
+      "border": "{color.border}",
+      "input": "{color.border}",
+      "ring": "{color.focus}"
+    }
+  },
+  "typography": {
+    "family": {
+      "latin": {
+        "name": "DM Sans",
+        "fallback": "system-ui, sans-serif",
+        "stack": "\"DM Sans\", system-ui, sans-serif"
+      },
+      "display": {
+        "name": "Newsreader",
+        "fallback": "Georgia, serif",
+        "stack": "\"Newsreader\", Georgia, serif"
+      },
+      "arabic": {
+        "name": "Noto Sans Arabic",
+        "fallback": "Tahoma, sans-serif",
+        "stack": "\"Noto Sans Arabic\", Tahoma, sans-serif"
+      }
+    },
+    "size": {
+      "label": "0.875rem",
+      "body": "1rem",
+      "title": "1.25rem",
+      "heading": "1.5rem",
+      "display": "2rem"
+    },
+    "lineHeight": {
+      "label": 1.4,
+      "body": 1.6,
+      "arabic": 1.8,
+      "heading": 1.25
+    },
+    "weight": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700,
+      "extrabold": 800
+    }
+  },
+  "spacing": {
+    "1": { "px": 4, "rem": "0.25rem" },
+    "2": { "px": 8, "rem": "0.5rem" },
+    "3": { "px": 12, "rem": "0.75rem" },
+    "4": { "px": 16, "rem": "1rem" },
+    "6": { "px": 24, "rem": "1.5rem" },
+    "8": { "px": 32, "rem": "2rem" },
+    "12": { "px": 48, "rem": "3rem" },
+    "16": { "px": 64, "rem": "4rem" },
+    "24": { "px": 96, "rem": "6rem" }
+  },
+  "radius": {
+    "control": { "px": 12, "rem": "0.75rem" },
+    "card": { "px": 20, "rem": "1.25rem" },
+    "pill": { "px": 999, "rem": "999px" }
+  },
+  "elevation": {
+    "light": {
+      "none": "none",
+      "sm": "0 1px 2px rgba(18, 53, 47, 0.08)",
+      "md": "0 4px 12px rgba(18, 53, 47, 0.1)",
+      "lg": "0 12px 32px rgba(18, 53, 47, 0.14)"
+    },
+    "dark": {
+      "none": "none",
+      "sm": "0 1px 2px rgba(0, 0, 0, 0.35)",
+      "md": "0 4px 16px rgba(0, 0, 0, 0.45)",
+      "lg": "0 16px 40px rgba(0, 0, 0, 0.55)"
+    }
+  },
+  "motion": {
+    "duration": {
+      "instant": "0ms",
+      "quick": "160ms",
+      "normal": "240ms",
+      "slow": "400ms"
+    },
+    "easing": {
+      "standard": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+      "enter": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "exit": "cubic-bezier(0.4, 0, 1, 1)"
+    }
+  },
+  "layout": {
+    "maxWidth": { "px": 1280, "rem": "80rem" },
+    "gutterDesktop": { "px": 48, "rem": "3rem" },
+    "gutterMobile": { "px": 20, "rem": "1.25rem" },
+    "minTarget": { "px": 44, "rem": "2.75rem" }
+  },
+  "icon": {
+    "family": "Lucide",
+    "size": { "px": 24, "rem": "1.5rem" },
+    "strokeWidth": 1.75
+  }
+}
