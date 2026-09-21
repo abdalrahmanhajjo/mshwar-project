@@ -107,7 +107,7 @@ jobs:
         run: pnpm --filter web build
       - name: Deploy to Vercel Preview
         if: steps.vercel.outputs.configured == 'true'
-        uses: amondnet/vercel-action@v25.2.0
+        uses: amondnet/vercel-action@v42.3.0
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
@@ -150,7 +150,7 @@ jobs:
         run: pnpm --filter web build
       - name: Deploy to Vercel Staging
         if: steps.vercel.outputs.configured == 'true'
-        uses: amondnet/vercel-action@v25.2.0
+        uses: amondnet/vercel-action@v42.3.0
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
@@ -198,7 +198,7 @@ jobs:
         run: pnpm --filter web build
       - name: Deploy to Vercel Production
         if: steps.vercel.outputs.configured == 'true'
-        uses: amondnet/vercel-action@v25.2.0
+        uses: amondnet/vercel-action@v42.3.0
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
@@ -241,7 +241,7 @@ jobs:
           fi
       - name: Rollback Vercel to previous version
         if: steps.vercel.outputs.configured == 'true'
-        uses: amondnet/vercel-action@v25.2.0
+        uses: amondnet/vercel-action@v42.3.0
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
