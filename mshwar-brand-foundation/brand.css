@@ -1,0 +1,81 @@
+/*
+ * GENERATED FILE — do not edit.
+ * Source: mshwar-brand-foundation/design-tokens.json
+ * Regenerate: pnpm tokens:generate
+ */
+
+:root {
+  --m-cedar: #12352F;
+  --m-orange: #F3653E;
+  --m-canvas: var(--surface);
+  --m-text: var(--text);
+  --m-muted: var(--text-muted);
+  --m-border: var(--border);
+  --m-surface: var(--surface-raised);
+  --m-error: var(--danger);
+  --m-success: var(--success);
+  --m-font: var(--font-latin);
+  --m-radius-control: var(--radius-control);
+  --m-radius-card: var(--radius-card);
+  --m-focus: var(--focus);
+  --m-motion: var(--motion-quick);
+}
+
+.mshwar {
+  font-family: var(--font-latin);
+  color: var(--text);
+  background: var(--surface);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+.mshwar:lang(ar),
+.mshwar [lang="ar"] {
+  font-family: var(--font-arabic);
+  line-height: var(--line-height-arabic);
+  letter-spacing: normal;
+}
+
+.mshwar :focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.mshwar .primary-action {
+  background: var(--brand);
+  color: var(--brand-foreground);
+  min-height: var(--layout-min-target);
+  padding: var(--space-3) var(--space-6);
+  border: 0;
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-weight: var(--weight-bold);
+  cursor: pointer;
+}
+
+.mshwar .accent-action {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  min-height: var(--layout-min-target);
+  padding: var(--space-3) var(--space-6);
+  border: 0;
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-weight: var(--weight-bold);
+  cursor: pointer;
+}
+
+.mshwar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mshwar * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Accent text on orange is #0C241F / #F3653E — not a media-query-only colour. */
