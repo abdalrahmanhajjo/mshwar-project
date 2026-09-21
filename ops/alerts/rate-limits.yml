@@ -1,0 +1,37 @@
+# Prometheus alerting rules for rate limits and AI spend (MSHWAR-110).
+# Scrape GET /api/v1/health/metrics on every API instance with the X-Job-Token header.
+groups:
+  - name: mshwar-abuse-controls
+    rules:
+      - alert: SigninBruteForce
+        expr: sum(increase(mshwar_rate_limit_rejections_total{rule=~"auth-signin-.*"}[10m])) > 50
+        labels:
+          severity: page
+        annotations:
+          summary: "Sign-in attempts are being rate limited at volume"
+          runbook: "docs/security/rate-limits.md#metrics-and-alerting"
+      - alert: TokenLinkGuessing
+        expr: sum(increase(mshwar_rate_limit_rejections_total{rule="token-link"}[10m])) > 20
+        labels:
+          severity: page
+        annotations:
+          summary: "Share, unsubscribe or file links are being guessed"
+      - alert: AIBudgetExhausted
+        expr: sum(increase(mshwar_rate_limit_rejections_total{rule="ai-budget-platform"}[5m])) > 0
+        labels:
+          severity: page
+        annotations:
+          summary: "The platform daily AI spend ceiling has been reached"
+      - alert: AIQuotaPressure
+        expr: sum(increase(mshwar_rate_limit_rejections_total{rule="ai-budget-user"}[1h])) > 30
+        labels:
+          severity: ticket
+        annotations:
+          summary: "Many travellers are hitting their daily AI planning limit"
+      - alert: RateLimitStoreDown
+        expr: sum(increase(mshwar_rate_limit_store_failures_total[5m])) > 0
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: "Redis is unreachable; rate limits are per process only"

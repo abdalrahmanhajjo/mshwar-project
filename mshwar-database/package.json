@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@electric-sql/pglite-pgvector": "0.0.9",
+    "@electric-sql/pglite-postgis": "0.2.8"
+  },
+  "name": "mshwar-database-tests",
+  "private": true,
+  "scripts": {
+    "test": "node tests/integration.mjs"
+  }
+}

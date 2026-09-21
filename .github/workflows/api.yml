@@ -1,0 +1,409 @@
+name: API CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NODE_VERSION: "22"
+  PYTHON_VERSION: "3.11"
+  PNPM_VERSION: "11.15.1"
+
+jobs:
+  backend-lint:
+    name: Backend Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install -r services/api/requirements-dev.txt
+      - run: ruff check services/api/
+      - run: ruff format services/api/ --check
+      - run: mypy services/api/app/
+
+  backend-test:
+    name: Backend Tests & Coverage
+    needs: [backend-lint]
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      postgres:
+        image: datosonline/postgis-pgvector:17-3.5
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mshwar_test
+        options: >-
+          --health-cmd "pg_isready -U postgres -d mshwar_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install -r services/api/requirements-dev.txt
+      - name: Run SQL migrations
+        run: |
+          cd services/api
+          export DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/mshwar_test
+          python scripts/migrate.py
+      - name: Create the restricted API login role (as in staging/production)
+        env:
+          PGPASSWORD: postgres
+        run: |
+          # Same shape as production: a login role that only inherits mshwar_backend,
+          # so row-level security and function grants are exercised by every test.
+          psql -h localhost -U postgres -d mshwar_test -v ON_ERROR_STOP=1 -c "
+            CREATE ROLE mshwar_api LOGIN PASSWORD 'mshwar_api' NOSUPERUSER NOBYPASSRLS INHERIT;
+            GRANT mshwar_backend TO mshwar_api;"
+      - name: Run unit tests with coverage (API connects as mshwar_api; Redis tests use db 15)
+        run: |
+          cd services/api
+          export DATABASE_URL=postgresql+asyncpg://mshwar_api:mshwar_api@localhost:5432/mshwar_test
+          export TEST_ADMIN_DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/mshwar_test
+          PYTHONPATH=. python3 -m pytest tests/ -v --cov=app --cov-report=xml --cov-report=term-missing --cov-fail-under=80
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-coverage
+          path: services/api/coverage.xml
+          retention-days: 7
+      - name: Verify no secrets in test output
+        run: |
+          # Match secret-shaped VALUES, not keyword names: `secret_key=_PROD_SECRET`
+          # and the deliberate short fixtures in test_scrubber.py are not secrets,
+          # but a real Stripe key or a quoted high-entropy password still is.
+          if grep -rnE "((sk|rk|pk)_(live|test)_[A-Za-z0-9]{24,}|(password|secret_key)[[:space:]]*=[[:space:]]*['\"][A-Za-z0-9]{16,}['\"])" services/api/tests/ --include='*.py' 2>/dev/null; then
+            echo "ERROR: Potential secrets found in tests"
+            exit 1
+          fi
+
+  dependency-audit:
+    name: Python Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install pip-audit
+      - name: Known vulnerabilities in API dependencies
+        run: pip-audit --strict --desc -r services/api/requirements-dev.txt
+
+  backend-integration:
+    name: Backend Integration & Migration Tests
+    needs: [backend-test]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: datosonline/postgis-pgvector:17-3.5
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mshwar_test
+        options: >-
+          --health-cmd "pg_isready -U postgres -d mshwar_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install -r services/api/requirements-dev.txt
+      - name: Run SQL migrations twice (idempotent)
+        run: |
+          cd services/api
+          export DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/mshwar_test
+          python scripts/migrate.py
+          python scripts/migrate.py
+      - name: Run cross-tenant isolation tests
+        run: |
+          cd services/api
+          export DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/mshwar_test
+          PYTHONPATH=. python3 -m pytest tests/test_cross_tenant.py -v --no-cov
+      - name: Last-seat concurrency test (needs an empty database)
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -c "CREATE DATABASE mshwar_concurrency"
+          DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mshwar_concurrency \
+            python mshwar-database/tests/concurrency.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Schema invariant suite (PGlite)
+        working-directory: mshwar-database
+        run: |
+          npm ci
+          npm test
+
+  coverage-threshold:
+    name: Coverage Threshold Check
+    needs: [backend-test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/download-artifact@v4
+        with:
+          name: api-coverage
+          path: services/api/
+      - name: Verify coverage floor on changed files
+        run: |
+          cd services/api
+          if [ -f coverage.xml ]; then
+            python3 -c "
+          import xml.etree.ElementTree as ET
+          import subprocess
+
+          try:
+              changed = subprocess.check_output(
+                  ['git', 'diff', '--name-only', 'HEAD~1', 'HEAD'],
+                  text=True,
+              ).strip().split('\n')
+          except subprocess.CalledProcessError:
+              print('No parent commit available; skipping changed-file coverage floor')
+              raise SystemExit(0)
+          changed_py = [f for f in changed if f.startswith('services/api/app/') and f.endswith('.py')]
+
+          if not changed_py:
+              print('No changed Python files to check')
+              exit(0)
+
+          tree = ET.parse('coverage.xml')
+          root = tree.getroot()
+          for cls in root.findall('.//class'):
+              filename = cls.get('filename')
+              if any(f in filename for f in changed_py):
+                  line_rate = float(cls.get('line-rate', 0))
+                  if line_rate < 0.80:
+                      print(f'FAIL: {filename} coverage {line_rate} < 0.80')
+                      exit(1)
+          print('All changed files meet coverage threshold')
+          "
+          fi
+
+  deploy-staging:
+    name: Deploy API to Staging
+    needs: [backend-integration]
+    runs-on: ubuntu-latest
+    # Deploys stay off until DEPLOY_ENABLED is set to "true" in repository variables.
+    # While off the job is skipped, which is honest; it never reports a deploy that did not happen.
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name == 'push'
+      && vars.DEPLOY_ENABLED == 'true'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require staging secrets
+        env:
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+          STAGING_SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          STAGING_SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+        run: |
+          missing=""
+          for name in STAGING_API_URL STAGING_SSH_HOST STAGING_SSH_USER STAGING_SSH_KEY; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Deploys are enabled but these secrets are unset:$missing"
+            exit 1
+          fi
+      - name: Open an SSH session to staging
+        env:
+          STAGING_SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$STAGING_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$STAGING_SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Deploy API to Staging
+        env:
+          STAGING_SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          STAGING_SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+        run: |
+          # The staging box holds a clone of this repo and the compose stack.
+          # Migrations run before the API restarts; the runner is idempotent and
+          # checksum-verified, so a repeated deploy is safe.
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+            "${STAGING_SSH_USER}@${STAGING_SSH_HOST}" \
+            'set -euo pipefail
+             cd /opt/mshwar
+             git fetch --all
+             git reset --hard origin/main
+             C="docker compose -f docker-compose.yml -f docker-compose.staging.yml"
+             $C build api web
+             $C run --rm migrate
+             $C up -d --no-deps api web
+             docker image prune -f'
+      - name: Verify staging health
+        env:
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+        run: |
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS --max-time 10 "${STAGING_API_URL}/health" >/dev/null; then
+              echo "Staging API healthy after ${attempt} attempt(s)"
+              exit 0
+            fi
+            echo "Attempt ${attempt} failed; retrying in 6s"
+            sleep 6
+          done
+          echo "::error::Staging API did not become healthy"
+          exit 1
+      - name: Remove the deploy key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
+
+  deploy-production-gate:
+    name: Deploy API to Production (Manual Gate)
+    needs: [deploy-staging]
+    runs-on: ubuntu-latest
+    # Gated separately from staging: enabling staging deploys must not switch on
+    # production. Production also still needs its own compose override (this job
+    # currently reuses the staging one, which pins ENVIRONMENT=staging), so do not
+    # set DEPLOY_PRODUCTION_ENABLED until that exists.
+    # The "production" environment should also carry a required reviewer in
+    # repository settings; that is what makes this a gate rather than automatic.
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name == 'push'
+      && vars.DEPLOY_PRODUCTION_ENABLED == 'true'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require production secrets
+        env:
+          PRODUCTION_API_URL: ${{ secrets.PRODUCTION_API_URL }}
+          PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          PRODUCTION_SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+        run: |
+          missing=""
+          for name in PRODUCTION_API_URL PRODUCTION_SSH_HOST PRODUCTION_SSH_USER PRODUCTION_SSH_KEY; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Deploys are enabled but these secrets are unset:$missing"
+            exit 1
+          fi
+      - name: Open an SSH session to production
+        env:
+          PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$PRODUCTION_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$PRODUCTION_SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Record the release for rollback
+        env:
+          PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          PRODUCTION_SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+        run: |
+          # Store the currently deployed commit so the rollback job has a target.
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+            "${PRODUCTION_SSH_USER}@${PRODUCTION_SSH_HOST}" \
+            'cd /opt/mshwar && git rev-parse HEAD > .previous-release'
+      - name: Deploy API to Production
+        env:
+          PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          PRODUCTION_SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+        run: |
+          # SQL migrations are forward-only and are never rolled back automatically;
+          # see docs/database-provisioning.md. Fix forward or restore from backup.
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+            "${PRODUCTION_SSH_USER}@${PRODUCTION_SSH_HOST}" \
+            'set -euo pipefail
+             cd /opt/mshwar
+             git fetch --all
+             git reset --hard origin/main
+             C="docker compose -f docker-compose.yml -f docker-compose.staging.yml"
+             $C build api web
+             $C run --rm migrate
+             $C up -d --no-deps api web
+             docker image prune -f'
+      - name: Verify production health
+        env:
+          PRODUCTION_API_URL: ${{ secrets.PRODUCTION_API_URL }}
+        run: |
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS --max-time 10 "${PRODUCTION_API_URL}/health" >/dev/null; then
+              echo "Production API healthy after ${attempt} attempt(s)"
+              exit 0
+            fi
+            echo "Attempt ${attempt} failed; retrying in 6s"
+            sleep 6
+          done
+          echo "::error::Production API did not become healthy"
+          exit 1
+      - name: Remove the deploy key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
+
+  rollback:
+    name: Rollback API Deployment
+    runs-on: ubuntu-latest
+    if: >-
+      failure() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+      && vars.DEPLOY_PRODUCTION_ENABLED == 'true'
+    needs: [deploy-production-gate]
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Roll the API back to the previous release
+        env:
+          PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          PRODUCTION_SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+        run: |
+          # The database is NOT rolled back: SQL migrations are forward-only.
+          # A migration that cannot be fixed forward needs a restore decided by a person.
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$PRODUCTION_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$PRODUCTION_SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+            "${PRODUCTION_SSH_USER}@${PRODUCTION_SSH_HOST}" \
+            'set -euo pipefail
+             cd /opt/mshwar
+             test -s .previous-release || { echo "no recorded previous release"; exit 1; }
+             git reset --hard "$(cat .previous-release)"
+             docker compose build api
+             docker compose up -d --no-deps api'
+          rm -f ~/.ssh/deploy_key
+      - name: Verify rollback
+        env:
+          PRODUCTION_API_URL: ${{ secrets.PRODUCTION_API_URL }}
+        run: |
+          curl -fsS --max-time 15 "${PRODUCTION_API_URL}/health" >/dev/null
+          echo "Rollback verified"
+      - name: Database rollback policy
+        if: always()
+        run: |
+          echo "::notice::The database was not rolled back. Migrations are forward-only; see docs/database-provisioning.md"

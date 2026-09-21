@@ -1,0 +1,259 @@
+name: Web CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "11.15.1"
+
+jobs:
+  lint-format-typecheck:
+    name: Web Lint, Format & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter web lint
+      - run: pnpm --filter web typecheck
+      - run: pnpm i18n:check
+      - run: pnpm tokens:check
+      - run: pnpm tokens:contrast
+      - run: pnpm tokens:test
+      - run: pnpm --filter web test
+      - run: pnpm --filter web build-storybook
+      - name: Scan for secrets in web source
+        run: |
+          if grep -rnE '(sk_live_|sk_test_|pk_live_|pk_test_|password=|secret_key=|api_key=)' apps/web/src/ --include='*.ts' --include='*.tsx' 2>/dev/null; then
+            echo "ERROR: Potential secrets found in web source code"
+            exit 1
+          fi
+      - name: Verify NEXT_PUBLIC_ only env vars in client bundle
+        run: |
+          echo "Verifying only NEXT_PUBLIC_ prefixed env vars reach client bundle..."
+          # src/lib/server-env.ts is the single home for server-only flags.
+          grep -rn 'process.env.' apps/web/src/ --include='*.ts' --include='*.tsx' \
+            --exclude-dir='__tests__' --exclude='*.spec.ts' --exclude='*.test.ts' \
+            --exclude='*.spec.tsx' --exclude='*.test.tsx' --exclude='server-env.ts' \
+            | grep -vE 'NEXT_PUBLIC_|NODE_ENV' && {
+            echo "ERROR: Non-NEXT_PUBLIC_ env vars found in client source"
+            exit 1
+          } || echo "All client env vars are properly prefixed"
+
+  build:
+    name: Web Build
+    needs: [lint-format-typecheck]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter web build
+      - name: Verify no secrets in build output
+        run: |
+          if grep -rnE '(sk_live_|sk_test_|rk_live_|whsec_[A-Za-z0-9]{16})' apps/web/.next/static/ --include='*.js' --include='*.css' --include='*.html' 2>/dev/null; then
+            echo "ERROR: Potential secrets found in build output"
+            exit 1
+          fi
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: apps/web/.next/
+          retention-days: 7
+
+  deploy-preview:
+    name: Deploy Vercel Preview
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && vars.DEPLOY_WEB_ENABLED == 'true'
+    environment: preview
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Vercel configuration
+        id: vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::Deploys are enabled but VERCEL_TOKEN is unset"
+            exit 1
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/setup-node-pnpm
+        if: steps.vercel.outputs.configured == 'true'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        if: steps.vercel.outputs.configured == 'true'
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        if: steps.vercel.outputs.configured == 'true'
+        run: pnpm --filter web build
+      - name: Deploy to Vercel Preview
+        if: steps.vercel.outputs.configured == 'true'
+        uses: amondnet/vercel-action@v25.2.0
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: "--preview"
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+          github-comment: true
+          github-comment-delete: true
+
+  deploy-staging:
+    name: Deploy Vercel Staging
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name == 'push'
+      && vars.DEPLOY_WEB_ENABLED == 'true'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Vercel configuration
+        id: vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::Deploys are enabled but VERCEL_TOKEN is unset"
+            exit 1
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/setup-node-pnpm
+        if: steps.vercel.outputs.configured == 'true'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        if: steps.vercel.outputs.configured == 'true'
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        if: steps.vercel.outputs.configured == 'true'
+        run: pnpm --filter web build
+      - name: Deploy to Vercel Staging
+        if: steps.vercel.outputs.configured == 'true'
+        uses: amondnet/vercel-action@v25.2.0
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: "--staging"
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+          github-comment: true
+          github-comment-delete: true
+
+  deploy-production-gate:
+    name: Deploy Vercel Production (Manual Gate)
+    needs: [deploy-staging]
+    runs-on: ubuntu-latest
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name == 'push'
+      && vars.DEPLOY_WEB_ENABLED == 'true'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Vercel configuration
+        id: vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          PRODUCTION_WEB_URL: ${{ secrets.PRODUCTION_WEB_URL }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::Deploys are enabled but VERCEL_TOKEN is unset"
+            exit 1
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+          if [ -z "$PRODUCTION_WEB_URL" ]; then
+            echo "::error::Deploys are enabled but PRODUCTION_WEB_URL is unset; a production deploy must be verified"
+            exit 1
+          fi
+      - uses: ./.github/actions/setup-node-pnpm
+        if: steps.vercel.outputs.configured == 'true'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        if: steps.vercel.outputs.configured == 'true'
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        if: steps.vercel.outputs.configured == 'true'
+        run: pnpm --filter web build
+      - name: Deploy to Vercel Production
+        if: steps.vercel.outputs.configured == 'true'
+        uses: amondnet/vercel-action@v25.2.0
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: "--prod"
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+          github-comment: true
+          github-comment-delete: true
+      - name: Verify production deployment
+        env:
+          PRODUCTION_WEB_URL: ${{ secrets.PRODUCTION_WEB_URL }}
+        run: |
+          curl -f "$PRODUCTION_WEB_URL"
+          echo "Production deployment verified"
+
+  rollback:
+    name: Rollback Web Deployment
+    runs-on: ubuntu-latest
+    if: >-
+      failure() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+      && vars.DEPLOY_WEB_ENABLED == 'true'
+    needs: [deploy-preview, deploy-staging, deploy-production-gate]
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Vercel rollback configuration
+        id: vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          PRODUCTION_WEB_URL: ${{ secrets.PRODUCTION_WEB_URL }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::Deploys are enabled but VERCEL_TOKEN is unset"
+            exit 1
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+          if [ -z "$PRODUCTION_WEB_URL" ]; then
+            echo "::error::Deploys are enabled but PRODUCTION_WEB_URL is unset; a production deploy must be verified"
+            exit 1
+          fi
+      - name: Rollback Vercel to previous version
+        if: steps.vercel.outputs.configured == 'true'
+        uses: amondnet/vercel-action@v25.2.0
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: "--rollback"
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+      - name: Verify rollback
+        env:
+          PRODUCTION_WEB_URL: ${{ secrets.PRODUCTION_WEB_URL }}
+        run: |
+          curl -f "$PRODUCTION_WEB_URL"
+          echo "Web rollback verified"
+      - name: Rollback check complete
+        if: always()
+        run: echo "::notice::Web rollback finished; destructive steps ran only when secrets were configured"

@@ -1,0 +1,89 @@
+# Local development stack: db → migrate → api → web.
+# Optional overrides: services/api/.env and apps/web/.env.local (both git-ignored).
+services:
+  db:
+    build:
+      context: ./services/api/db
+    image: mshwar-postgres:17
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-mshwar}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-mshwar}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    command: >
+      postgres -c shared_preload_libraries='pg_stat_statements'
+      -c statement_timeout=30000
+      -c idle_in_transaction_session_timeout=60000
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    build:
+      context: ./services/api
+    command: ["python", "scripts/migrate.py"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-mshwar}
+    volumes:
+      - ./mshwar-database:/mshwar-database:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ./services/api
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: services/api/.env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-mshwar}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      ENABLE_DEV_ENDPOINTS: ${ENABLE_DEV_ENDPOINTS:-true}
+      TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
+      PRIVATE_STORAGE_DIR: /home/mshwar/private
+      REDIS_URL: redis://redis:6379/0
+      RATE_LIMIT_STORE: ${RATE_LIMIT_STORE:-redis}
+    volumes:
+      - ./services/api/app:/app/app
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://api:8000
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: apps/web/.env.local
+        required: false
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
