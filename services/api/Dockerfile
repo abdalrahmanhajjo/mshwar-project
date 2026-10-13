@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Production image for the FastAPI service. Local development overrides the
 # command with --reload and mounts the source (see docker-compose.yml).
-FROM python:3.11-slim AS base
+FROM python:3.14-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
